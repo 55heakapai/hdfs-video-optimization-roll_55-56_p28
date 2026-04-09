@@ -3,6 +3,8 @@
    BDA Lab Project #28 — HDFS Video Storage Dashboard
    ============================================================ */
 
+console.log('✓ simulator.js loaded successfully');
+
 /* Throughput values (MB/s) for each block size configuration */
 const THROUGHPUT_MAP = {
   64:  190,

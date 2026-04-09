@@ -1,0 +1,74 @@
+C:\Windows\System32>hdfs dfs -setrep 2 /video/sample.mp4
+Replication 2 set: /video/sample.mp4
+
+C:\Windows\System32>hdfs fsck /video/sample.mp4 -files -blocks -locations
+Connecting to namenode via http://localhost:50070/fsck?ugi=Hea44&files=1&blocks=1&locations=1&path=%2Fvideo%2Fsample.mp4
+FSCK started by Hea44 (auth:SIMPLE) from /127.0.0.1 for path /video/sample.mp4 at Wed Apr 08 18:37:49 IST 2026
+
+Status: HEALTHY
+ Total size:    17839845 B
+ Total dirs:    0
+ Total files:   1
+ Total symlinks:                0
+ Total blocks (validated):      1 (avg. block size 17839845 B)
+ Minimally replicated blocks:   1 (100.0 %)
+ Over-replicated blocks:        0 (0.0 %)
+ Under-replicated blocks:       1 (100.0 %)
+ Mis-replicated blocks:         0 (0.0 %)
+ Default replication factor:    1
+ Average block replication:     1.0
+ Corrupt blocks:                0
+ Missing replicas:              1 (50.0 %)
+ Number of data-nodes:          1
+ Number of racks:               1
+FSCK ended at Wed Apr 08 18:37:49 IST 2026 in 4 milliseconds
+
+
+The filesystem under path '/video/sample.mp4' is HEALTHY
+
+C:\Windows\System32>hdfs dfs -get /videos/sample.mp4
+get: `/videos/sample.mp4': No such file or directory
+
+C:\Windows\System32>hdfs dfs -get /video/sample.mp4
+
+C:\Windows\System32>hdfs dfs -stat "%r %b %n" /video/sample.mp4
+stat: `b n': No such file or directory
+2026-04-08 12:55:05
+
+C:\Windows\System32>hdfs dfsadmin -report
+Configured Capacity: 146800635904 (136.72 GB)
+Present Capacity: 128023963807 (119.23 GB)
+DFS Remaining: 128005984256 (119.21 GB)
+DFS Used: 17979551 (17.15 MB)
+DFS Used%: 0.01%
+Under replicated blocks: 1
+Blocks with corrupt replicas: 0
+Missing blocks: 0
+Missing blocks (with replication factor 1): 0
+Pending deletion blocks: 0
+
+-------------------------------------------------
+Live datanodes (1):
+
+Name: 127.0.0.1:50010 (database.herd.test)
+Hostname: Hea
+Decommission Status : Normal
+Configured Capacity: 146800635904 (136.72 GB)
+DFS Used: 17979551 (17.15 MB)
+Non DFS Used: 18776672097 (17.49 GB)
+DFS Remaining: 128005984256 (119.21 GB)
+DFS Used%: 0.01%
+DFS Remaining%: 87.20%
+Configured Cache Capacity: 0 (0 B)
+Cache Used: 0 (0 B)
+Cache Remaining: 0 (0 B)
+Cache Used%: 100.00%
+Cache Remaining%: 0.00%
+Xceivers: 1
+Last contact: Wed Apr 08 21:43:33 IST 2026
+Last Block Report: Wed Apr 08 18:16:28 IST 2026
+
+
+
+C:\Windows\System32>hdfs dfs -du -h /video
+17.0 M  /video/sample.mp4
