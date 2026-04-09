@@ -3,8 +3,6 @@
    BDA Lab Project #28 — HDFS Video Storage Dashboard
    ============================================================ */
 
-console.log('✓ data.js loaded successfully');
-
 const CMD_OUTPUTS = {
 
   jps: `<span class="info">29276 NameNode</span>
