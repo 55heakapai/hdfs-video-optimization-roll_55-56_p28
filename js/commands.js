@@ -3,6 +3,8 @@
    BDA Lab Project #28 — HDFS Video Storage Dashboard
    ============================================================ */
 
+console.log('✓ commands.js loaded successfully');
+
 /* Track the currently selected command card */
 let activeCmd = null;
 

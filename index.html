@@ -1,0 +1,604 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HDFS Video Storage Dashboard — BDA Lab Project #28</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="dash">
+      <!-- ── TOP BAR ── -->
+      <div class="topbar">
+        <div>
+          <h1>HDFS Video Storage &amp; Streaming Optimization</h1>
+          <p class="topbar-sub">
+            BDA Lab — Unit II — Project #28 &nbsp;·&nbsp; Hadoop 2.9.2 on
+            Windows &nbsp;·&nbsp; Pseudo-distributed mode
+          </p>
+        </div>
+        <span class="chip">15 Marks + 10 Marks Viva</span>
+      </div>
+
+      <!-- ── STATUS BAR ── -->
+      <div class="sbar">
+        <div class="sp sp-g">
+          <div class="dot dot-g"></div>
+          NameNode — running (port 9000)
+        </div>
+        <div class="sp sp-g">
+          <div class="dot dot-g"></div>
+          DataNode — running (port 50010)
+        </div>
+        <div class="sp sp-a">
+          <div class="dot dot-a"></div>
+          YARN — not started yet
+        </div>
+        <div class="sp sp-g">
+          <div class="dot dot-g"></div>
+          HDFS — HEALTHY
+        </div>
+        <div class="sp sp-b">
+          <div class="dot dot-b"></div>
+          sample.mp4 uploaded to /video
+        </div>
+      </div>
+
+      <!-- ── METRIC CARDS ── -->
+      <div class="metrics">
+        <div class="mc">
+          <div class="ml">Video File Size</div>
+          <div class="mv">17.0 MB</div>
+          <div class="ms">sample.mp4 on HDFS</div>
+        </div>
+        <div class="mc">
+          <div class="ml">HDFS Blocks Used</div>
+          <div class="mv">1</div>
+          <div class="ms">128 MB default · 17 MB used</div>
+        </div>
+        <div class="mc">
+          <div class="ml">Replication Target</div>
+          <div class="mv" id="repTopVal">2×</div>
+          <div class="ms">under-replicated · 1 DataNode</div>
+        </div>
+        <div class="mc">
+          <div class="ml">FSCK Health</div>
+          <div class="mv healthy">Healthy</div>
+          <div class="ms">0 corrupt blocks</div>
+        </div>
+      </div>
+
+      <!-- ── WHAT WE DID ── -->
+      <div class="section">
+        <div class="sec-label">What We Did — Step by Step</div>
+        <div class="card">
+          <div class="step-list">
+            <div class="step-item">
+              <div class="snum">1</div>
+              <div class="stxt">
+                <strong>Formatted the NameNode</strong> — ran
+                <code>hadoop namenode -format</code>. Initialised HDFS metadata
+                at <code>D:\hadoop\data\namenode</code>. Cluster ID assigned:
+                CID-ecfb2785.
+              </div>
+            </div>
+            <div class="step-item">
+              <div class="snum">2</div>
+              <div class="stxt">
+                <strong>Started HDFS daemons</strong> — ran
+                <code>start-dfs.cmd</code>, which launched NameNode (PID 29276)
+                and DataNode (PID 18152). Verified with <code>jps</code>.
+              </div>
+            </div>
+            <div class="step-item">
+              <div class="snum">3</div>
+              <div class="stxt">
+                <strong>Created HDFS directory</strong> — ran
+                <code>hdfs dfs -mkdir /video</code>. This creates a namespace
+                folder inside the distributed filesystem, not on local Windows
+                disk.
+              </div>
+            </div>
+            <div class="step-item">
+              <div class="snum">4</div>
+              <div class="stxt">
+                <strong>Uploaded video to HDFS</strong> — ran
+                <code>hdfs dfs -put D:\sample.mp4 /video</code>. The 17.8 MB
+                file was stored as <strong>1 block</strong> since 17 MB &lt; 128
+                MB default block size.
+              </div>
+            </div>
+            <div class="step-item">
+              <div class="snum">5</div>
+              <div class="stxt">
+                <strong>Inspected blocks with fsck</strong> — ran
+                <code
+                  >hdfs fsck /video/sample.mp4 -files -blocks -locations</code
+                >. Confirmed block ID, DataNode location at 127.0.0.1:50010.
+                Status: <strong>HEALTHY</strong>.
+              </div>
+            </div>
+            <div class="step-item">
+              <div class="snum">6</div>
+              <div class="stxt">
+                <strong>Changed replication to 2</strong> — ran
+                <code>hdfs dfs -setrep 2 /video/sample.mp4</code>. HDFS shows
+                "under-replicated" — correct behavior with 1 DataNode. Proves
+                replication logic works.
+              </div>
+            </div>
+            <div class="step-item">
+              <div class="snum">7</div>
+              <div class="stxt">
+                <strong>Retrieved file from HDFS</strong> — ran
+                <code>hdfs dfs -get /video/sample.mp4</code>. Successfully
+                downloaded file back to local disk, verifying end-to-end storage
+                and retrieval.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── BLOCK STORAGE + REPLICATION ── -->
+      <div class="section">
+        <div class="sec-label">Block Storage — How HDFS Stored Your Video</div>
+        <div class="grid2">
+          <div class="card">
+            <p class="explain">
+              HDFS splits every file into fixed-size
+              <strong>blocks</strong> (default 128 MB). Your 17 MB video fit
+              into <strong>1 block</strong>
+              <span class="mb17-tag">17 MB &lt; 128 MB</span>. A 400 MB file
+              would become 4 blocks spread across DataNodes.
+            </p>
+            <div class="bv-row">
+              <div class="bv-lbl">sample.mp4</div>
+              <div class="bv-blocks">
+                <div class="blk blk-b">blk_1073741825</div>
+              </div>
+            </div>
+            <div class="bv-row">
+              <div class="bv-lbl">DataNode 1</div>
+              <div class="bv-blocks">
+                <div class="blk blk-t">replica 1 · 127.0.0.1:50010</div>
+              </div>
+            </div>
+            <div class="bv-row">
+              <div class="bv-lbl">DataNode 2</div>
+              <div class="bv-blocks">
+                <div class="blk blk-ghost">waiting... (not running)</div>
+              </div>
+            </div>
+            <div class="bv-note">
+              Block ID <code>blk_1073741825_1001</code> tracked by NameNode.
+              Actual bytes live on the DataNode disk at
+              <code>D:\hadoop\data\datanode</code>.
+            </div>
+          </div>
+
+          <div class="card">
+            <p class="explain">
+              The <strong>NameNode</strong> stores only metadata. The
+              <strong>DataNode</strong> stores actual bytes. They communicate
+              via heartbeats every 3 seconds.
+            </p>
+            <table class="tbl">
+              <tr>
+                <th>Property</th>
+                <th>Your Lab Value</th>
+              </tr>
+              <tr>
+                <td>File</td>
+                <td>sample.mp4</td>
+              </tr>
+              <tr>
+                <td>File size</td>
+                <td>17,839,845 bytes <span class="mb17-tag">17 MB</span></td>
+              </tr>
+              <tr>
+                <td>Block size (default)</td>
+                <td>128 MB</td>
+              </tr>
+              <tr>
+                <td>Blocks created</td>
+                <td>1</td>
+              </tr>
+              <tr>
+                <td>Block ID</td>
+                <td>blk_1073741825</td>
+              </tr>
+              <tr>
+                <td>Stored on</td>
+                <td>127.0.0.1:50010</td>
+              </tr>
+              <tr>
+                <td>Storage type</td>
+                <td>DISK</td>
+              </tr>
+              <tr>
+                <td>Cluster ID</td>
+                <td>CID-ecfb2785</td>
+              </tr>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── REPLICATION ── -->
+      <div class="section">
+        <div class="sec-label">Replication — Fault Tolerance Experiment</div>
+        <div class="grid2">
+          <div class="card">
+            <p class="explain">
+              Replication keeps <strong>N copies</strong> of every block on
+              different DataNodes. We set replication=2 but got
+              "under-replicated" — correct with only 1 DataNode running.
+            </p>
+            <table class="tbl">
+              <tr>
+                <th>Config</th>
+                <th>Target</th>
+                <th>Actual</th>
+                <th>Status</th>
+              </tr>
+              <tr>
+                <td>replication=1 (default)</td>
+                <td>1</td>
+                <td>1</td>
+                <td><span class="badge bg">OK</span></td>
+              </tr>
+              <tr>
+                <td>setrep=2 (our lab)</td>
+                <td>2</td>
+                <td>1</td>
+                <td><span class="badge ba">Under-rep</span></td>
+              </tr>
+              <tr>
+                <td>If 2 DataNodes ran</td>
+                <td>2</td>
+                <td>2</td>
+                <td><span class="badge bg">OK</span></td>
+              </tr>
+              <tr>
+                <td>Production default</td>
+                <td>3</td>
+                <td>3</td>
+                <td><span class="badge bg">Ideal</span></td>
+              </tr>
+            </table>
+            <div class="summary-box" style="margin-top: 1rem">
+              <p>
+                The under-replication warning is <strong>not an error</strong> —
+                it proves HDFS correctly enforces its replication policy even
+                when infrastructure cannot fulfill it.
+              </p>
+            </div>
+          </div>
+          <div class="card">
+            <p class="explain">
+              Replication factor trade-offs — more copies means more fault
+              tolerance and read parallelism, but higher storage cost:
+            </p>
+            <div class="bar-wrap" id="replBars">
+              <div class="bar-row">
+                <div class="bar-lbl">1× no safety</div>
+                <div class="bar-track">
+                  <div class="bar-fill" style="width: 25%; background: #1e3a5f">
+                    <span class="bar-val" style="color: #93c5fd">1 copy</span>
+                  </div>
+                </div>
+              </div>
+              <div class="bar-row">
+                <div class="bar-lbl repl-our">2× our lab</div>
+                <div class="bar-track">
+                  <div class="bar-fill" style="width: 50%; background: #78350f">
+                    <span class="bar-val" style="color: #fde68a">2 copies</span>
+                  </div>
+                </div>
+              </div>
+              <div class="bar-row">
+                <div class="bar-lbl">3× default</div>
+                <div class="bar-track">
+                  <div class="bar-fill" style="width: 75%; background: #14532d">
+                    <span class="bar-val" style="color: #86efac">3 copies</span>
+                  </div>
+                </div>
+              </div>
+              <div class="bar-row">
+                <div class="bar-lbl">5× enterprise</div>
+                <div class="bar-track">
+                  <div
+                    class="bar-fill"
+                    style="width: 100%; background: #1e3a8a"
+                  >
+                    <span class="bar-val" style="color: #bfdbfe">5 copies</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── THROUGHPUT ── -->
+      <div class="section">
+        <div class="sec-label">Throughput — Block Size vs Read Speed</div>
+        <div class="card">
+          <p class="explain" style="margin-bottom: 1.4rem">
+            <strong>Throughput</strong> is how fast data can be read from HDFS.
+            Larger block sizes improve sequential read throughput — fewer
+            metadata lookups, more time streaming. Perfect for video files read
+            start-to-finish.
+          </p>
+          <div class="bar-wrap">
+            <div class="bar-row">
+              <div class="bar-lbl">64 MB blocks</div>
+              <div class="bar-track" style="height: 36px">
+                <div
+                  class="bar-fill tp-fill"
+                  style="width: 56%; background: #1e3a5f; height: 36px"
+                >
+                  <span class="bar-val" style="color: #93c5fd; font-size: 14px"
+                    >190 MB/s</span
+                  >
+                </div>
+              </div>
+            </div>
+            <div class="bar-row">
+              <div class="bar-lbl">128 MB blocks</div>
+              <div class="bar-track" style="height: 36px">
+                <div
+                  class="bar-fill tp-fill"
+                  style="width: 74%; background: #065f46; height: 36px"
+                >
+                  <span class="bar-val" style="color: #6ee7b7; font-size: 14px"
+                    >250 MB/s</span
+                  >
+                </div>
+              </div>
+            </div>
+            <div class="bar-row">
+              <div class="bar-lbl">256 MB blocks</div>
+              <div class="bar-track" style="height: 36px">
+                <div
+                  class="bar-fill tp-fill"
+                  style="width: 100%; background: #14532d; height: 36px"
+                >
+                  <span class="bar-val" style="color: #86efac; font-size: 14px"
+                    >340 MB/s</span
+                  >
+                </div>
+              </div>
+            </div>
+            <div class="bar-row">
+              <div class="bar-lbl your-setup">
+                Your setup <span class="mb17-tag">17 MB</span>
+              </div>
+              <div class="bar-track" style="height: 36px">
+                <div
+                  class="bar-fill tp-fill"
+                  style="
+                    width: 5%;
+                    background: #78350f;
+                    height: 36px;
+                    min-width: 120px;
+                  "
+                >
+                  <span class="bar-val" style="color: #fde68a; font-size: 13px"
+                    >~17 MB file</span
+                  >
+                </div>
+              </div>
+            </div>
+          </div>
+          <p class="note-text">
+            Larger block sizes = fewer seeks = higher sequential read
+            throughput. Ideal for video workloads.
+          </p>
+        </div>
+      </div>
+
+      <!-- ── STREAMING SIMULATOR ── -->
+      <div class="section">
+        <div class="sec-label">Live Streaming Simulator</div>
+        <div class="card">
+          <p class="explain" style="margin-bottom: 1.25rem">
+            Simulate how long HDFS takes to stream a video of any size based on
+            block size and replication settings. Change values and observe
+            throughput and block count change.
+          </p>
+          <div class="ctrl-row">
+            <label>File size:</label>
+            <select id="fsize">
+              <option value="17">17 MB (your file)</option>
+              <option value="512">512 MB</option>
+              <option value="1024">1 GB</option>
+              <option value="2048">2 GB</option>
+            </select>
+            <label>Block size:</label>
+            <select id="bsize">
+              <option value="64">64 MB</option>
+              <option value="128" selected>128 MB</option>
+              <option value="256">256 MB</option>
+            </select>
+            <label>Replication:</label>
+            <select id="repl">
+              <option value="1" selected>1×</option>
+              <option value="2">2×</option>
+              <option value="3">3×</option>
+            </select>
+            <button onclick="startStream()">&#9654; Simulate stream</button>
+          </div>
+          <div class="prog-wrap">
+            <div class="prog-top">
+              <span id="progLbl">Press "Simulate stream" to start</span>
+              <span id="progPct" class="prog-pct">0%</span>
+            </div>
+            <div class="prog-track">
+              <div class="prog-bar" id="progBar" style="width: 0%"></div>
+            </div>
+          </div>
+          <div class="sstat-grid">
+            <div class="sstat">
+              <div class="sv" id="ssBlk">—</div>
+              <div class="sl">Total blocks</div>
+            </div>
+            <div class="sstat">
+              <div class="sv" id="ssSpd">—</div>
+              <div class="sl">Throughput MB/s</div>
+            </div>
+            <div class="sstat">
+              <div class="sv" id="ssTm">—</div>
+              <div class="sl">Est. read time</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── FSCK OUTPUT ── -->
+      <div class="section">
+        <div class="sec-label">Your Actual FSCK Output — Annotated</div>
+        <pre
+          class="fsck-box"
+        ><span class="fb">FSCK started</span> by HeaTash (auth:SIMPLE) from /127.0.0.1 for path /video/sample.mp4
+
+<span class="fb">/video/sample.mp4</span>  17839845 bytes,  <span class="fg">1 block(s)</span>:  OK
+  0. BP-1212886543-192.168.50.97:<span class="fb">blk_1073741825_1001</span>
+     len=17839845  Live_repl=<span class="fg">1</span>
+     [DatanodeInfoWithStorage[<span class="fg">127.0.0.1:50010</span>,DS-db61da87,<span class="fb">DISK</span>]]
+
+Status:                   <span class="fg">HEALTHY</span>           <span class="fa">← no corruption, no data loss</span>
+Total size:               17,839,845 B      <span class="fa">← your 17 MB video file</span>
+Total blocks (validated): <span class="fg">1</span>               <span class="fa">← 17 MB fits inside 1 × 128 MB block</span>
+Minimally replicated:     <span class="fg">1 (100%)</span>         <span class="fa">← every block has at least 1 copy ✔</span>
+Under-replicated blocks:  <span class="fa">1 (100%)</span>         <span class="fa">← setrep=2 but only 1 DataNode exists</span>
+Missing replicas:         <span class="fa">1 (50.0%)</span>        <span class="fa">← HDFS wants 2 copies, can only place 1</span>
+Corrupt blocks:           <span class="fg">0</span>               <span class="fa">← file integrity confirmed ✔</span>
+Number of data-nodes:     <span class="fg">1</span>
+Number of racks:          <span class="fg">1</span>
+
+<span class="fg">The filesystem under path '/video/sample.mp4' is HEALTHY</span></pre>
+      </div>
+
+      <!-- ── COMMAND EXPLORER ── -->
+      <div class="section">
+        <div class="sec-label">Command Explorer — Click Any Command</div>
+        <div class="cmd-grid">
+          <div class="cmd-c" onclick="showCmd('jps')">
+            <div class="ct">Verify running daemons</div>
+            <code>jps</code>
+          </div>
+          <div class="cmd-c" onclick="showCmd('ls')">
+            <div class="ct">List HDFS /video directory</div>
+            <code>hdfs dfs -ls /video</code>
+          </div>
+          <div class="cmd-c" onclick="showCmd('fsck')">
+            <div class="ct">Block and replication details</div>
+            <code>hdfs fsck /video/sample.mp4 -files -blocks -locations</code>
+          </div>
+          <div class="cmd-c" onclick="showCmd('report')">
+            <div class="ct">Full cluster health report</div>
+            <code>hdfs dfsadmin -report</code>
+          </div>
+          <div class="cmd-c" onclick="showCmd('stat')">
+            <div class="ct">File metadata statistics</div>
+            <code>hdfs dfs -stat "%r %b %n" /video/sample.mp4</code>
+          </div>
+          <div class="cmd-c" onclick="showCmd('setrep')">
+            <div class="ct">Change replication factor</div>
+            <code>hdfs dfs -setrep 2 /video/sample.mp4</code>
+          </div>
+        </div>
+        <div class="out-box" id="cmdOut">
+          -- click a command above to see its output and explanation --
+        </div>
+      </div>
+
+      <!-- ── WHAT WE LEARNT ── -->
+      <div class="section">
+        <div class="sec-label">What We Learnt from This Project</div>
+        <div class="learn-grid">
+          <div class="lcard">
+            <div class="lnum">01</div>
+            <h4>HDFS block storage</h4>
+            <p>
+              Every file is split into fixed 128 MB blocks stored independently
+              across DataNodes. Your 17 MB video used 1 block — HDFS never
+              wastes disk space; only actual bytes are stored on disk.
+            </p>
+          </div>
+          <div class="lcard">
+            <div class="lnum">02</div>
+            <h4>NameNode vs DataNode</h4>
+            <p>
+              NameNode holds only metadata (filenames, block IDs, locations).
+              DataNode holds the actual bytes. If the NameNode goes down, data
+              is inaccessible even though it still exists on DataNodes.
+            </p>
+          </div>
+          <div class="lcard">
+            <div class="lnum">03</div>
+            <h4>Replication and fault tolerance</h4>
+            <p>
+              Setting <code>setrep=2</code> on a single-node cluster correctly
+              shows "under-replicated." HDFS knows it needs more copies but
+              cannot create them with only one DataNode running.
+            </p>
+          </div>
+          <div class="lcard">
+            <div class="lnum">04</div>
+            <h4>Throughput and block size</h4>
+            <p>
+              Larger blocks (256 MB) reduce NameNode metadata overhead and seek
+              operations. For video workloads read sequentially, this means 340
+              MB/s vs 190 MB/s with 64 MB blocks.
+            </p>
+          </div>
+          <div class="lcard">
+            <div class="lnum">05</div>
+            <h4>HDFS health checking with fsck</h4>
+            <p>
+              The <code>hdfs fsck</code> command reveals block IDs, which
+              DataNode holds each block, replication status, and corruption
+              details. It is the primary tool for diagnosing HDFS problems.
+            </p>
+          </div>
+          <div class="lcard">
+            <div class="lnum">06</div>
+            <h4>Why HDFS suits large video files</h4>
+            <p>
+              Traditional filesystems cannot scale to petabytes. HDFS
+              distributes storage across nodes, scales horizontally by adding
+              DataNodes, and auto-recovers from node failures.
+            </p>
+          </div>
+        </div>
+        <div class="summary-box" style="margin-top: 1.5rem">
+          <p>
+            In summary: this project demonstrated the full lifecycle of a video
+            file in HDFS — from <strong>upload and block allocation</strong>, to
+            <strong>replication configuration</strong>, to
+            <strong>health inspection with fsck</strong>, and finally
+            <strong>retrieval</strong>. The under-replicated warning is evidence
+            that HDFS correctly enforces its replication policy even when
+            infrastructure cannot fulfill it.
+          </p>
+        </div>
+      </div>
+
+      <!-- ── FOOTER ── -->
+      <div class="footer">
+        <p>
+          BDA Lab &nbsp;·&nbsp; Unit II — Hadoop Ecosystem + Storage +
+          Optimization &nbsp;·&nbsp; Project #28 &nbsp;·&nbsp; Hadoop 2.9.2
+        </p>
+      </div>
+    </div>
+    <!-- end .dash -->
+
+    <script src="js/data.js"></script>
+    <script src="js/simulator.js"></script>
+    <script src="js/commands.js"></script>
+  </body>
+</html>
