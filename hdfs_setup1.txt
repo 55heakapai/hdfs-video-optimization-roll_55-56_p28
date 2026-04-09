@@ -1,0 +1,50 @@
+C:\Windows\System32>hdfs namenode -format
+C:\Windows\System32>start-dfs.cmd
+
+C:\Windows\System32>jps
+18152 DataNode
+15468 Jps
+29276 NameNode
+
+C:\Windows\System32>cd D:\Hadoop\hadoop-2.9.2
+
+C:\Windows\System32>hdfs dfs -mkdir /video
+
+C:\Windows\System32>hdfs dfs -put D:\sample.mp4 /video
+
+C:\Windows\System32>hdfs dfs -ls /video
+Found 1 items
+-rw-r--r--   1 HeaTash supergroup   17839845 2026-04-08 18:25 /video/sample.mp4
+
+C:\Windows\System32>hdfs dfs -ls /video
+Found 1 items
+-rw-r--r--   1 HeaTash supergroup   17839845 2026-04-08 18:25 /video/sample.mp4
+
+C:\Windows\System32>hdfs fsck /video/sample.mp4 -files -blocks -locations
+Connecting to namenode via http://localhost:50070/fsck?ugi=Hea44&files=1&blocks=1&locations=1&path=%2Fvideo%2Fsample.mp4
+FSCK started by Hea44 (auth:SIMPLE) from /127.0.0.1 for path /video/sample.mp4 at Wed Apr 08 18:25:47 IST 2026
+
+Status: HEALTHY
+ Total size:    17839845 B
+ Total dirs:    0
+ Total files:   1
+ Total symlinks:                0
+ Total blocks (validated):      1 (avg. block size 17839845 B)
+ Minimally replicated blocks:   1 (100.0 %)
+ Over-replicated blocks:        0 (0.0 %)
+ Under-replicated blocks:       0 (0.0 %)
+ Mis-replicated blocks:         0 (0.0 %)
+ Default replication factor:    1
+ Average block replication:     1.0
+ Corrupt blocks:                0
+ Missing replicas:              0 (0.0 %)
+ Number of data-nodes:          1
+ Number of racks:               1
+FSCK ended at Wed Apr 08 18:25:47 IST 2026 in 13 milliseconds
+
+
+The filesystem under path '/video/sample.mp4' is HEALTHY
+
+C:\Windows\System32>hdfs dfs -setrep -w 2 /video/sample.mp4
+Replication 2 set: /video/sample.mp4
+Waiting for /video/sample.mp4 ................................Terminate batch job (Y/N)? y
