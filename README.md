@@ -1,8 +1,14 @@
 # HDFS Video Storage & Streaming Optimization
-## BDA Lab — Unit II — Project #28
+## BDA Lab — Unit II —(Hadoop Ecosystem + Storage + Optimization) 
+## Project No - 28
 
 ---
+##  Team
 
+| Roll No | Name |
+|---------|------|
+| 55 | Hea Kapai |
+| 56 | Ishika Mokati |
 ## Project Structure
 
 ```
@@ -49,9 +55,8 @@ hdfs_dashboard/
 | Field         | Value                                      |
 |---------------|--------------------------------------------|
 | Course        | Big Data Analytics Lab                     |
-| Unit          | Unit II — Hadoop Ecosystem + Storage       |
+| Unit          | Unit II — Hadoop Ecosystem + Storage + Optimization       |
 | Project No.   | 28                                         |
 | Topic         | HDFS-Based Video Storage & Streaming       |
 | Concepts      | Block storage, Replication, Throughput     |
 | Hadoop        | Apache Hadoop 2.9.2 (Windows)              |
-| Marks         | 15 (project) + 10 (viva) = 25 total       |
